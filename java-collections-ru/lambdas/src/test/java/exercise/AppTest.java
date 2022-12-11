@@ -85,5 +85,5 @@ class AppTest {
         String[][] actual3 = App.enlargeArrayImage(image3);
         assertThat(actual3).isEqualTo(enlargedImage3);
     }
-}`
+}
 // END
