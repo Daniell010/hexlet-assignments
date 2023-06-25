@@ -32,7 +32,7 @@ import com.github.database.rider.core.api.dataset.DataSet;
 // Для этого нужно внедрить MockMvc
 
 // BEGIN
-
+@AutoConfigureMockMvc
 // END
 
 // Чтобы исключить влияние тестов друг на друга,
