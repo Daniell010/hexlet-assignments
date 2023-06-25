@@ -114,52 +114,58 @@ public class AppTest {
 
     // BEGIN
     @Test
-    void testUpdatePerson() throws Exception {
-
-        MockHttpServletResponse responsePatch = mockMvc
-                .perform(
-                        patch("/people/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{ \"firstName\": \"Jack\", \"lastName\": \"Butch\"}")
-                )
-                .andReturn()
-                .getResponse();
-
-        assertThat(responsePatch.getStatus()).isEqualTo(200);
-
+    void testGetPeople() throws Exception {
         MockHttpServletResponse response = mockMvc
                 .perform(get("/people"))
                 .andReturn()
                 .getResponse();
 
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_JSON.toString());
 
-        assertThat(response.getContentAsString()).contains("Jack", "Butch");
-        assertThat(response.getContentAsString()).doesNotContain("John", "Smith");
+        assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_JSON.toString());
+        assertThat(response.getContentAsString()).contains("John", "Smith");
+        assertThat(response.getContentAsString()).contains("Jack", "Doe");
+    }
+
+    @Test
+    void testUpdatePerson() throws Exception {
+        var existingUserEmail = "jack@mail.com";
+        var existingUserId = TestUtils.getUserIdByEmail(mockMvc, existingUserEmail);
+
+        PersonDto dto = new PersonDto();
+        dto.setFirstName("Will");
+        dto.setLastName("Walker");
+        dto.setEmail("a@a.com");
+
+        mockMvc
+                .perform(
+                        patch("/people/{id}", existingUserId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(dto))
+                )
+                .andExpect(status().isOk());
+
+
+        MockHttpServletResponse response = mockMvc
+                .perform(get("/people"))
+                .andReturn()
+                .getResponse();
+
+        assertNotNull(repository.findByEmail("a@a.com"));
+        assertNull(repository.findByEmail(existingUserEmail));
     }
 
     @Test
     void testDeletePerson() throws Exception {
+        var existingUserEmail = "jack@mail.com";
+        var existingUserId = TestUtils.getUserIdByEmail(mockMvc, existingUserEmail);
 
-        MockHttpServletResponse responsePatch = mockMvc
-                .perform(
-                        delete("/people/5")
-                )
-                .andReturn()
-                .getResponse();
+        mockMvc
+                .perform(delete("/people/{id}", existingUserId))
+                .andExpect(status().isOk());
 
-        assertThat(responsePatch.getStatus()).isEqualTo(200);
 
-        MockHttpServletResponse response = mockMvc
-                .perform(get("/people"))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_JSON.toString());
-
-        assertThat(response.getContentAsString()).doesNotContain("Fill", "Sapolsky");
+        assertNull(repository.findByEmail(existingUserEmail));
     }
     // END
 }
