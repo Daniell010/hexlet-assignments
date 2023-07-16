@@ -25,7 +25,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("user"));
 
         // BEGIN
-        
+        User user = repository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(), user.getPassword(), authorities
+        );
         // END
     }
 }

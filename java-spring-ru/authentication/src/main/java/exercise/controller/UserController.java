@@ -29,6 +29,15 @@ public class UserController {
     }
 
     // BEGIN
-    
+    @PostMapping(path = "")
+    public User createUser(@RequestBody UserDto userDto) {
+        User user = new User();
+        user.setUsername(userDto.username());
+        user.setEmail(userDto.email());
+        // Храним пароль в зашифрованном виде
+        user.setPassword(encoder.encode(userDto.password()));
+
+        return userRepository.save(user);
+    }
     // END
 }
